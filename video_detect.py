@@ -14,7 +14,7 @@ ap.add_argument(
     help="path to labels file"
 )
 ap.add_argument(
-    "-c", "--confidence", type=float, default=0.9,
+    "-c", "--confidence", type=float, default=0.1,
     help="minimum probability to filter weak detections"
 )
 ap.add_argument(
@@ -44,7 +44,11 @@ print("[INFO] min confidence", _MIN_CONFIDENCE)
 # initialize the video stream and allow the camera sensor to warmup
 print("[INFO] starting video stream...")
 video_stream = Streamer()
-video_stream.set_detection_viewing_mode(model, 'convert')
+video_stream.set_detection_model(
+    model,
+    view_mode='camera',
+    nn_input_mode='zero-pad'
+)
 
 
 
