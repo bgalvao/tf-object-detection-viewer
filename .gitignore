@@ -3,4 +3,5 @@ __pycache__/
 *.py[cod]
 
 tf_files/
+samples/
 .vscode/
