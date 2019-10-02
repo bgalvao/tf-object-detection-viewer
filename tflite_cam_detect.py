@@ -16,7 +16,7 @@ ap.add_argument("-l",
 ap.add_argument("-c",
                 "--confidence",
                 type=float,
-                default=0.1,
+                default=0.5,
                 help="minimum probability to filter weak detections")
 ap.add_argument("-d",
                 "--detection_engine",
