@@ -1,4 +1,4 @@
-# Tensorflow object detection testing code
+# TensorFlow object detection viewer
 
 
 
@@ -49,5 +49,7 @@ optional arguments:
 
 
 
+## how to train your own model and obtain model files
 
+Besides all you can find on the webs, you can start with this [wiki](https://bitbucket.org/burnpnk/tf-object-detection-viewer/wiki/Home), written with this repo in mind. Also, this project started with this [article from Tony607](https://www.dlology.com/blog/how-to-train-an-object-detection-model-easy-for-free/) (and its associated [repo](https://github.com/Tony607/object_detection_demo)).
 
