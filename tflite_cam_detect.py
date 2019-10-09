@@ -3,15 +3,19 @@ from model.tflite import SSD_TFLite
 from video.streamer import Streamer
 import cv2
 
+
+RELEASE = 'bcst/'
+
+
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-m",
                 "--model",
-                default='./tf_files/3/detect.tflite',
+                default='./tf_files/' + RELEASE + 'detect.tflite',
                 help="path to TensorFlow Lite object detection model")
 ap.add_argument("-l",
                 "--labels",
-                default='./tf_files/3/label_map.pbtxt',
+                default='./tf_files/' + RELEASE + 'label_map.pbtxt',
                 help="path to labels file")
 ap.add_argument("-c",
                 "--confidence",

@@ -3,17 +3,20 @@ from model.tf import SSD_TF
 from video.streamer import Streamer
 import cv2
 
+
+RELEASE = 'bcst/'
+
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 
 ap.add_argument("-m",
                 "--graph_pb",
-                default='./tf_files/3/frozen_inference_graph.pb',
+                default='./tf_files/' + RELEASE + 'frozen_inference_graph.pb',
                 help="path to Tensorflow protobuf object detection model")
 
 ap.add_argument("-c",
                 "--graph_config",
-                default='./tf_files/3/graph.pbtxt',
+                default='./tf_files/' + RELEASE + 'graph.pbtxt',
                 help="path to pbtxt graph config file")
 
 ap.add_argument("-p",
