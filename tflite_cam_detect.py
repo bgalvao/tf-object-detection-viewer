@@ -50,9 +50,11 @@ print("[INFO] min confidence", _MIN_CONFIDENCE)
 # initialize the video stream and allow the camera sensor to warmup
 print("[INFO] starting video stream...")
 video_stream = Streamer()
-video_stream.set_detection_model(model,
-                                 view_mode='camera',
-                                 nn_input_mode='zero-pad')
+video_stream.set_detection_model(
+    model,
+    view_mode='camera',
+    nn_input_mode='zero-pad'
+)
 
 # loop over the frames from the video stream
 while True:
@@ -84,9 +86,12 @@ while True:
         cv2.rectangle(bgr_frame, box[1], box[0], colors[label_idx])
 
         # label the rectangle
-        y = start_y - 15 if start_y - 15 > 15 else start_y + 15
+        vert_offset = 3
+        y = start_y - vert_offset \
+            if start_y - vert_offset > vert_offset \
+            else start_y + vert_offset
         #text = "{} :: {:.2f}%".format(label, score * 100)
-        text = "{} :: {:.2f}%".format(labels[label_idx], score * 100)
+        text = "{} :: {:.0f}%".format(labels[label_idx], score * 100)
         #print(start_x, y)
 
         cv2.putText(
@@ -95,7 +100,7 @@ while True:
             (start_x, y),
             cv2.FONT_HERSHEY_SIMPLEX,
             .35,
-            colors[label_idx], 2
+            colors[label_idx], 1
         )
 
 
