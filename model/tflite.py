@@ -62,11 +62,15 @@ class SSD_TFLite:
             self.interpreter.get_tensor(output['index'])
             for output in self.output_details
         ]
+
+        self.classes = self.classes.reshape([-1]).astype(int)
+        # print('CALSSA', self.classes)
         # change int classes to their labels
-        #self.classes = list(map(self.labels.get, self.classes))
-        self.classes = np.array([
-            self.labels[key] for key in self.classes.reshape([-1]).astype(int)
-        ])
+        
+        # self.classes = np.array([
+        #     self.labels[key] for key in self.classes.reshape([-1]).astype(int)
+        # ])
+
         # reshape for convenience
         self.boxes = self.boxes.reshape([-1, 4])
         self.scores = self.scores.reshape([-1])

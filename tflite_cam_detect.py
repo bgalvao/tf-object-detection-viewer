@@ -1,11 +1,12 @@
 import argparse
-from model.tflite import SSD_TFLite
+from model.tflite import SSD_TFLite, load_labels
 from video.streamer import Streamer
 import cv2
 
+from colormap import colormap
+colors = {i: color for i, color in enumerate(colormap.values())}
 
-RELEASE = 'bcst/'
-
+RELEASE = 'bwdst_filtered_2000/'
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -20,7 +21,7 @@ ap.add_argument("-l",
 ap.add_argument("-c",
                 "--confidence",
                 type=float,
-                default=0.5,
+                default=0.1,
                 help="minimum probability to filter weak detections")
 ap.add_argument("-d",
                 "--detection_engine",
@@ -34,6 +35,8 @@ _MODEL_PATH = args['model']
 _LABELMAP_PATH = args['labels']
 _MIN_CONFIDENCE = args['confidence']
 _DETECTION_ENGINE = args['detection_engine']
+
+labels = load_labels(_LABELMAP_PATH)
 
 # note that to use the edge TPU,
 # as of now, you really have to use a UINT8 Quantized model.
@@ -63,7 +66,7 @@ while True:
     results = zip(boxes, classes, scores)
 
     # loop over the results
-    for box, label, score in results:
+    for box, label_idx, score in results:
         # extract the bounding box and box and predicted class label
         # box = r.bounding_box.flatten().astype("int")
         # (startX, startY, endX, endY) = box
@@ -78,16 +81,22 @@ while True:
         #     print(box[0][0], box[1][0])
         #     raise
         # #assert box[0][1] < box[1][1]
-        cv2.rectangle(bgr_frame, box[1], box[0], (0, 255, 0))
+        cv2.rectangle(bgr_frame, box[1], box[0], colors[label_idx])
 
         # label the rectangle
         y = start_y - 15 if start_y - 15 > 15 else start_y + 15
         #text = "{} :: {:.2f}%".format(label, score * 100)
-        text = "{:.2f}%".format(score * 100)
+        text = "{} :: {:.2f}%".format(labels[label_idx], score * 100)
         #print(start_x, y)
 
-        cv2.putText(bgr_frame, text, (start_x, y), cv2.FONT_HERSHEY_SIMPLEX,
-                    .35, (0, 255, 0), 2)
+        cv2.putText(
+            bgr_frame,
+            text,
+            (start_x, y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            .35,
+            colors[label_idx], 2
+        )
 
 
     # show the output frame and wait for a key press
