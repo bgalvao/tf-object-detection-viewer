@@ -87,12 +87,6 @@ while True:
     scores = model.get_scores()
     class_idxs = model.get_class_idxs() - 1  # ja ajusta o indice
 
-
-    # if i % 15 == 0:
-    #     print('\n{} detections'.format(model.get_bounding_boxes().shape[0]))
-    #     for j in model.get_scores().round(2):
-    #         print('-', j)
-
     # loop over the resulting bounding boxes
     for box, score, class_idx in zip(boxes, scores, class_idxs):
         color = colors[class_idx]
