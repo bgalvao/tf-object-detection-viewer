@@ -29,6 +29,8 @@ ap.add_argument("-d",
                 default="lite",
                 help="pick a selection engine: (default) 'lite' to use \
     tf.lite.Interpreter; 'edge' to use Coral's Edge TPU.")
+
+
 args = vars(ap.parse_args())
 # I hereby convene that command line args are prefixed with _ and uppercased
 _MODEL_PATH = args['model']
@@ -36,10 +38,9 @@ _LABELMAP_PATH = args['labels']
 _MIN_CONFIDENCE = args['confidence']
 _DETECTION_ENGINE = args['detection_engine']
 
+
 labels = load_labels(_LABELMAP_PATH)
 
-# note that to use the edge TPU,
-# as of now, you really have to use a UINT8 Quantized model.
 
 print(_MODEL_PATH)
 
@@ -49,54 +50,55 @@ print("[INFO] min confidence", _MIN_CONFIDENCE)
 
 # initialize the video stream and allow the camera sensor to warmup
 print("[INFO] starting video stream...")
-video_stream = Streamer()
-video_stream.set_detection_model(
-    model,
-    view_mode='camera',
-    nn_input_mode='zero-pad'
-)
+
+cap = cv2.VideoCapture('./samples/sample_d.mkv')
+
+
 
 # loop over the frames from the video stream
 while True:
 
-    # there's stuff to work on according to this note:
-    # https://www.tensorflow.org/lite/models/object_detection/overview#location
-    bgr_frame, rgb_frame = video_stream.next_frame()
-    boxes, classes, scores, num_detections = model.fprop(
-        rgb_frame).get_output_tensors(_MIN_CONFIDENCE)
-    boxes = video_stream.boxes2bbs(boxes)
-    results = zip(boxes, classes, scores)
+    ret, bgr_frame = cap.read()
 
-    # loop over the results
-    for box, label_idx, score in results:
+    if ret:
 
-        start_x, start_y = box[0]
-        end_x, end_y = box[1]
+        rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
 
-        cv2.rectangle(bgr_frame, box[1], box[0], colors[label_idx])
+        boxes, classes, scores, num_detections = model.fprop(
+            rgb_frame).get_output_tensors(_MIN_CONFIDENCE)
+        boxes = video_stream.boxes2bbs(boxes)
+        results = zip(boxes, classes, scores)
 
-        # label the rectangle
-        vert_offset = 3
-        y = start_y - vert_offset \
-            if start_y - vert_offset > vert_offset \
-            else start_y + vert_offset
+        # loop over the results
+        for box, label_idx, score in results:
 
-        text = "{} :: {:.0f}%".format(labels[label_idx], score * 100)
+            start_x, start_y = box[0]
+            end_x, end_y = box[1]
 
-        cv2.putText(
-            bgr_frame,
-            text,
-            (start_x, y),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            .35,
-            colors[label_idx], 1
-        )
+            cv2.rectangle(bgr_frame, box[1], box[0], colors[label_idx])
+
+            # label the rectangle
+            vert_offset = 3
+            y = start_y - vert_offset \
+                if start_y - vert_offset > vert_offset \
+                else start_y + vert_offset
+
+            text = "{} :: {:.0f}%".format(labels[label_idx], score * 100)
+
+            cv2.putText(
+                bgr_frame,
+                text,
+                (start_x, y),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                .35,
+                colors[label_idx], 1
+            )
 
 
-    # show the output frame and wait for a key press
-    cv2.imshow("Frame", bgr_frame)
-    key = cv2.waitKey(1) & 0xFF
+        # show the output frame and wait for a key press
+        cv2.imshow("Frame", bgr_frame)
+        key = cv2.waitKey(1) & 0xFF
 
-    # if the `q` key was pressed, break from the loop
-    if key == ord("q"):
-        break
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break
