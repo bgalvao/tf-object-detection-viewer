@@ -7,7 +7,13 @@ import cv2
 from colormap import colormap
 colors = {i: color for i, color in enumerate(colormap.values())}
 
-RELEASE = 'bcst/'
+# RELEASE = 'bwdst_mobilenet_v2_ssd_21500steps/'
+#RELEASE = 'bwdst_filtered_2000/'
+#RELEASE = 'bwdst_filtered_10000/'
+#RELEASE = 'bwdst_quantized_12900/'  # remember to change line 58 of model/tflite.py
+# RELEASE = 'bcst_10000/'
+# RELEASE = 'bcst/'
+RELEASE = '3/'
 
 
 # construct the argument parser and parse the arguments

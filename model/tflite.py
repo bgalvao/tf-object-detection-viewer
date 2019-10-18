@@ -52,9 +52,12 @@ class SSD_TFLite:
         #assert input_data.shape == self.input_details[0]['shape'], 'welp'
 
         # set input tensor and forward prop
-        #print(input_data.shape)
-        self.interpreter.set_tensor(self.input_details[0]['index'],
-                                    input_data.astype('float32'))
+        print(input_data.shape)
+        self.interpreter.set_tensor(
+            self.input_details[0]['index'],
+            #input_data.astype('uint8')
+            input_data.astype('float32')
+        )
         self.interpreter.invoke()
 
         # update refs to output tensors

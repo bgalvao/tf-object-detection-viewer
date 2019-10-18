@@ -6,7 +6,13 @@ import cv2
 from colormap import colormap
 colors = {i: color for i, color in enumerate(colormap.values())}
 
-RELEASE = 'bwdst_filtered_2000/'
+# RELEASE = 'bwdst_mobilenet_v2_ssd_21500steps/'
+#RELEASE = 'bwdst_filtered_2000/'
+#RELEASE = 'bwdst_filtered_10000/'
+#RELEASE = 'bwdst_quantized_12900/'  # remember to change line 58 of model/tflite.py
+# RELEASE = 'bcst_10000/'
+# RELEASE = 'bcst/'
+RELEASE = '3/'
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -21,7 +27,7 @@ ap.add_argument("-l",
 ap.add_argument("-c",
                 "--confidence",
                 type=float,
-                default=0.1,
+                default=0.5,
                 help="minimum probability to filter weak detections")
 ap.add_argument("-d",
                 "--detection_engine",
@@ -56,54 +62,58 @@ print("[INFO] starting video stream...")
 #cap = cv2.VideoCapture('./samples/sample_a.mkv')
 #cap = cv2.VideoCapture('./samples/sample_b.mkv')
 #cap = cv2.VideoCapture('./samples/sample_c.mp4')
-cap = cv2.VideoCapture('./samples/sample_d.mkv')
-
+cap = Streamer('./samples/sample_d.mkv')
+cap.set_detection_model(
+    model,
+    view_mode='camera',
+    nn_input_mode='zero-pad'
+)
 
 
 # loop over the frames from the video stream
 while True:
 
-    ret, bgr_frame = cap.read()
+    print(cap.read())
+    #ret = cap.read()
+    bgr_frame, rgb_frame = cap.next_frame()
 
-    if ret:
+    #if ret:
 
-        rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
+    boxes, classes, scores, num_detections = model.fprop(
+        rgb_frame).get_output_tensors(_MIN_CONFIDENCE)
+    boxes = cap.boxes2bbs(boxes)
+    results = zip(boxes, classes, scores)
 
-        boxes, classes, scores, num_detections = model.fprop(
-            rgb_frame).get_output_tensors(_MIN_CONFIDENCE)
-        boxes = video_stream.boxes2bbs(boxes)
-        results = zip(boxes, classes, scores)
+    # loop over the results
+    for box, label_idx, score in results:
 
-        # loop over the results
-        for box, label_idx, score in results:
+        start_x, start_y = box[0]
+        end_x, end_y = box[1]
 
-            start_x, start_y = box[0]
-            end_x, end_y = box[1]
+        cv2.rectangle(bgr_frame, box[1], box[0], colors[label_idx])
 
-            cv2.rectangle(bgr_frame, box[1], box[0], colors[label_idx])
+        # label the rectangle
+        vert_offset = 3
+        y = start_y - vert_offset \
+            if start_y - vert_offset > vert_offset \
+            else start_y + vert_offset
 
-            # label the rectangle
-            vert_offset = 3
-            y = start_y - vert_offset \
-                if start_y - vert_offset > vert_offset \
-                else start_y + vert_offset
+        text = "{} :: {:.0f}%".format(labels[label_idx], score * 100)
 
-            text = "{} :: {:.0f}%".format(labels[label_idx], score * 100)
-
-            cv2.putText(
-                bgr_frame,
-                text,
-                (start_x, y),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                .35,
-                colors[label_idx], 1
-            )
+        cv2.putText(
+            bgr_frame,
+            text,
+            (start_x, y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            .35,
+            colors[label_idx], 1
+        )
 
 
-        # show the output frame and wait for a key press
-        cv2.imshow("Frame", bgr_frame)
-        key = cv2.waitKey(1) & 0xFF
+    # show the output frame and wait for a key press
+    cv2.imshow("Frame", bgr_frame)
+    key = cv2.waitKey(1) & 0xFF
 
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q"):
-            break
+    # if the `q` key was pressed, break from the loop
+    if key == ord("q"):
+        break

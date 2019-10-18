@@ -6,7 +6,14 @@ import cv2
 from colormap import colormap
 colors = {i: color for i, color in enumerate(colormap.values())}
 
-RELEASE = 'bwdst_filtered_2000/'
+
+# RELEASE = 'bwdst_mobilenet_v2_ssd_21500steps/'
+#RELEASE = 'bwdst_filtered_2000/'
+#RELEASE = 'bwdst_filtered_10000/'
+#RELEASE = 'bwdst_quantized_12900/'  # remember to change line 58 of model/tflite.py
+# RELEASE = 'bcst_10000/'
+# RELEASE = 'bcst/'
+RELEASE = '3/'
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -29,6 +36,7 @@ ap.add_argument("-d",
                 default="lite",
                 help="pick a selection engine: (default) 'lite' to use \
     tf.lite.Interpreter; 'edge' to use Coral's Edge TPU.")
+
 args = vars(ap.parse_args())
 # I hereby convene that command line args are prefixed with _ and uppercased
 _MODEL_PATH = args['model']
@@ -49,8 +57,8 @@ print("[INFO] min confidence", _MIN_CONFIDENCE)
 
 # initialize the video stream and allow the camera sensor to warmup
 print("[INFO] starting video stream...")
-video_stream = Streamer()
-video_stream.set_detection_model(
+cam_stream = Streamer()
+cam_stream.set_detection_model(
     model,
     view_mode='camera',
     nn_input_mode='zero-pad'
@@ -61,10 +69,10 @@ while True:
 
     # there's stuff to work on according to this note:
     # https://www.tensorflow.org/lite/models/object_detection/overview#location
-    bgr_frame, rgb_frame = video_stream.next_frame()
+    bgr_frame, rgb_frame = cam_stream.next_frame()
     boxes, classes, scores, num_detections = model.fprop(
         rgb_frame).get_output_tensors(_MIN_CONFIDENCE)
-    boxes = video_stream.boxes2bbs(boxes)
+    boxes = cam_stream.boxes2bbs(boxes)
     results = zip(boxes, classes, scores)
 
     # loop over the results

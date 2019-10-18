@@ -55,9 +55,9 @@ print("[INFO] min confidence", _MIN_CONFIDENCE)
 
 # initialize the video stream and allow the camera sensor to warmup
 print("[INFO] starting cam stream...")
-video_stream = Streamer()
+cam_stream = Streamer()
 
-frame_sample = video_stream.read()
+frame_sample = cam_stream.read()
 height, width = list(frame_sample.shape)[:2]
 
 model = SSD_TF(
@@ -78,7 +78,7 @@ labels = load_labels(_LABELMAP_PATH)
 
 # loop over the frames from the video stream
 while True:
-    bgr_frame = video_stream.read()
+    bgr_frame = cam_stream.read()
     
     # model inference
     model.fprop(bgr_frame)
